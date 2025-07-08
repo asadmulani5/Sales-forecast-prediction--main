@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Forecast Prediction</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<style>
+    body {
+        padding-left: 150px;
+        padding-right: 150px;
+        background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20190223/ourmid/pngtree-blue-genetic-dna-medical-background-windbackground-display-boardbackgroundpsdcolorful-image_77077.jpg');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        font-size: large;
+    }
+
+    .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #251313;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-top: 20px;
+    }
+
+    .selected-text {
+        text-align: center;
+        font-style: italic;
+        font-style: bold;
+        color: rgb(31, 25, 95);
+    }
+
+    form {
+        padding-top: 20px;
+        text-align: center;
+        max-width: auto;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        padding-left: 220px;
+        display: block;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+
+    input[type="date"],
+    select {
+        padding-top: 30px;
+        width: 60%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 60%;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .predictionResult {
+        color: red;
+    }
+
+    #predictionResult {
+        margin-top: 20px;
+    }
+
+    #imageContainer img {
+        max-width: 47%; /* Adjust the width as needed */
+        height: auto;
+        display: inline-block; /* Display images inline */
+        margin: 10px; /* Add some margin between images */
+}
+</style>
+
+<body>
+<h1>SALES FORECAST PREDICTION</h1>
+<p style="font-size: larger; text-align: center;">
+    Welcome, this webpage would help you in predicting sales for the medicines over a period of time selected based on previous data of sales. This can help you understand resource allocation, better strategic planning related to sales and managing ordering of medical items, this can prevent waste of medicines. As of 2019, the World Health Organization (WHO) has maintained a list of 460 essential medicines and over 19,000 prescription drug products approved for marketing.
+</p>
+<p style="text-align: center;">In this model medicines are divided into 8 categories according to their usage. The below given table contains the information related to the those respectively:
+
+    <table border="2">
+        <tr>
+            <th>Category</th>
+            <th>Usage</th>
+
+        </tr>
+        <tr>
+            <td>M01AB</td>
+            <td>Anti-inflammatory and antirheumatic products, non-steroids, Acetic acid derivatives and related substances</td>
+
+        </tr>
+        <tr>
+            <td>M01AE</td>
+            <td>Anti-inflammatory and antirheumatic products, non-steroids, Propionic acid derivativesAnti-inflammatory and antirheumatic products, non-steroids, Propionic acid derivatives</td>
+
+        </tr>
+        <tr>
+            <td>N02BA</td>
+            <td>Other analgesics and antipyretics, Salicylic acid and derivatives</td>
+        </tr>
+
+        <tr>
+            <td>N02BE</td>
+            <td>Other analgesics and antipyretics, Pyrazolones and Anilides</td>
+        </tr>
+        <tr>
+            <td>N05B</td>
+            <td>Psycholeptics drugs, Anxiolytic drugs</td>
+        </tr>
+        <tr>
+            <td>N05C</td>
+            <td>Psycholeptics drugs, Hypnotics and sedatives drugs</td>
+        </tr>
+        <tr>
+            <td>R03</td>
+            <td>Drugs for obstructive airway diseases</td>
+        </tr>
+        <tr>
+            <td>R06</td>
+            <td>Antihistamines for systemic use</td>
+        </tr>
+
+
+    </table>
+
+    <div class="form-container">
+        <form id="predictionForm">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date">
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date">
+            <br>
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+                <option>Category</option>
+                <option value="M01AB">M01AB</option>
+                <option value="M01AE">M01AE</option>
+                <option value="N02BA">N02BA</option>
+                <option value="N02BE">N02BE</option>
+                <option value="N05B">N05B</option>
+                <option value="N05C">N05C</option>
+                <option value="R03">R03</option>
+                <option value="R06">R06</option>
+            </select>
+            <br>
+            <button type="button" onclick="predictQuantity()">Predict</button>
+            <div style="color: red;" id="predictionResult"></div>
+        </form>
+    </div>
+
+    <p style="text-align: center;">To keep a record of sales of every medicine is a difficult task. In this model, the features contain the categories of medicine which were sold from year 2014 to 2019 and divided into 8 categories like M01AB, M01AE, N02BA, N02BE, N05B, N05C,R03, and R06 based on their pharmaceutical usage.
+    <p>
+    <select style="width: 100%; text-align: center;" id="dropdown" onchange="displayText()">
+        <option value="">Select</option>
+        <option value="option1">M01AB</option>
+        <option value="option2">M01AE</option>
+        <option value="option3">N02BA</option>
+        <option value="option4">N02BE</option>
+        <option value="option5">N05B</option>
+        <option value="option6">N05C</option>
+        <option value="option7">R03</option>
+        <option value="option8">R06</option>
+    </select>
+    <p style="text-align: center; font-style: italic; font-size: larger; font-style: bold; color: #081446;"
+       id="selected-text"></p>
+
+    <p id="result"></p>
+    <p></p>
+
+    <p style="text-align: center;"> For the easy understanding of sales and better user experience, the graphical representation of predicted sales is given below:
+
+    <div id="imageContainer"></div>
+</body>
+
+<script>
+    function predictQuantity() {
+        var start_date = document.getElementById("start_date").value;
+        var end_date = document.getElementById("end_date").value;
+        var category = document.getElementById("category").value;
+
+        fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({start_date: start_date, end_date: end_date, category: category})
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Debugging: Check if data is received correctly
+                document.getElementById("predictionResult").innerHTML = "Predicted Quantity: " + data.total_predicted_quantity;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function displayText() {
+        var dropdown = document.getElementById("dropdown");
+        var selectedValue = dropdown.value;
+        var textContainer = document.getElementById("selected-text");
+        // Define text content for different options
+        var textContent = {
+            "option1": "M01AB is a subgroup of the Anatomical Therapeutic Chemical (ATC) classification system, which is a classification system for drugs administered by the World Health Organization (WHO). The M01AB subgroup specifically refers to drugs used in the treatment of inflammatory conditions and pain in the musculoskeletal system. These drugs belong to the class of nonsteroidal anti-inflammatory drugs (NSAIDs) and are further classified based on their chemical structure and mode of action. Common drugs included in the M01AB subgroup are ibuprofen, naproxen, diclofenac, indomethacin, and others.",
+            "option2": "The M01AE subgroup in the Anatomical Therapeutic Chemical (ATC) classification system refers to drugs used in the treatment of inflammatory conditions and pain in the musculoskeletal system. Specifically, M01AE includes drugs that are selective inhibitors of cyclooxygenase-2 (COX-2 inhibitors). Common drugs included in the M01AE subgroup are celecoxib and etoricoxib. These medications are commonly prescribed for conditions such as osteoarthritis, rheumatoid arthritis, and acute pain.",
+            "option3": "The N02BA subgroup in the Anatomical Therapeutic Chemical (ATC) classification system refers to drugs used for the treatment of migraine. Specifically, this subgroup includes drugs called analgesics and anti-inflammatory drugs in combination with psycholeptics which are intended to relieve pain and include a component that affects the central nervous system.",
+            "option4": "The N02BE subgroup in the Anatomical Therapeutic Chemical (ATC) classification system includes drugs used for the treatment of migraine. Specifically, these drugs are ergot alkaloids. Common drugs included in the N02BE subgroup are ergotamine and dihydroergotamine. These medications are used to relieve acute migraine attacks and are often prescribed when other treatments, such as analgesics or triptans, are ineffective or contraindicated.",
+            "option5": "The N05B subgroup in the Anatomical Therapeutic Chemical (ATC) classification system refers to drugs used in the treatment of psycholeptic-related extrapyramidal symptoms. These are adverse effects related to the use of certain antipsychotic medications, which can include symptoms such as tremors, rigidity, bradykinesia (slowness of movement), and dystonia (abnormal muscle contractions). These medications are prescribed to individuals experiencing insomnia, anxiety, or other sleep-related disorders.",
+            "option6": "The N05C subgroup in the Anatomical Therapeutic Chemical (ATC) classification system includes drugs used in the treatment of hypnotics and sedatives. These medications are primarily used to induce sleep (hypnotics) or promote relaxation and reduce anxiety (sedatives). They act on the central nervous system to produce calming or sleep-inducing effects. ",
+            "option7": "The R03 subgroup in the Anatomical Therapeutic Chemical (ATC) classification system includes drugs used in the treatment of respiratory diseases. This subgroup covers medications primarily indicated for the treatment of asthma and chronic obstructive pulmonary disease (COPD), as well as other respiratory conditions.",
+            "option8": "The R06 subgroup in the Anatomical Therapeutic Chemical (ATC) classification system includes drugs used for the treatment of allergic rhinitis and other upper respiratory tract allergies. These medications are commonly referred to as antihistamines and are used to alleviate symptoms such as sneezing, itching, runny nose, and nasal congestion associated with allergies. Antihistamines are often used as the first-line treatment for allergic rhinitis and upper respiratory allergies. However, it's important to use them judiciously and under the guidance of a healthcare professional.",
+        };
+
+        // Update text content based on selected option
+        if (selectedValue !== "") {
+            textContainer.textContent = textContent[selectedValue];
+            displayImages(selectedValue);
+        } else {
+            textContainer.textContent = ""; // Clear text content if no option is selected
+        }
+    }
+
+    function displayImages(selectedValue) {
+    var imageContainer = document.getElementById("imageContainer");
+    // Clear previous images
+    imageContainer.innerHTML = "";
+    // Define image URLs for different options
+    var imageUrls = {
+        "option1": ["/static/yq1.jpg", "/static/m1.jpg"],
+        "option2": ["/static/yq2.jpg", "/static/m2.jpg"],
+        "option3": ["/static/yq3.jpg", "/static/m3.jpg"],
+        "option4": ["/static/yq4.jpg", "/static/m4.jpg"],
+        "option5": ["/static/yq5.jpg", "/static/m5.jpg"],
+        "option6": ["/static/yq6.jpg", "/static/m6.jpg"],
+        "option7": ["/static/yq7.jpg", "/static/m7.jpg"],
+        "option8": ["/static/yq8.jpg", "/static/m8.jpg"],
+        // Add URLs for other options...
+    };
+
+    // Display images based on selected option
+    if (selectedValue !== "") {
+        var selectedImages = imageUrls[selectedValue];
+        selectedImages.forEach(function (imageUrl) {
+            var img = document.createElement("img");
+            img.src = imageUrl;
+            imageContainer.appendChild(img);
+        });
+    }
+}
+
+</script>
+</html>
